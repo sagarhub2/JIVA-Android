@@ -28,6 +28,8 @@ public class MainActivity extends Activity {
     private JivaMemory memory;
     private JivaHistory history;
     private JivaSearch search;
+    private JivaTime time;
+    private JivaWeather weather;
 
     private LinearLayout chatLayout;
 
@@ -97,7 +99,9 @@ public class MainActivity extends Activity {
                         Toast.LENGTH_SHORT).show());
 
         tools.setOnClickListener(v -> {
-            String result = JivaSearch.search("latest news");
+            String result = "Current time: " + JivaTime.getDateTime()
+                    + "\n\nWeather: "
+                    + JivaWeather.getWeather(24.5854, 73.7125);
             addMessage("JIVA Search", result.substring(0,
                     Math.min(result.length(), 1000)));
         });
@@ -105,6 +109,8 @@ public class MainActivity extends Activity {
         memory = new JivaMemory(this);
         history = new JivaHistory(this);
         search = new JivaSearch();
+        time = new JivaTime();
+        weather = new JivaWeather();
 
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
