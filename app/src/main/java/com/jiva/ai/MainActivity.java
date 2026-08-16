@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
     private SpeechRecognizer speechRecognizer;
     private Intent speechIntent;
     private TextToSpeech textToSpeech;
+    private JivaMemory memory;
 
     private LinearLayout chatLayout;
 
@@ -96,6 +97,8 @@ public class MainActivity extends Activity {
         tools.setOnClickListener(v ->
                 Toast.makeText(this, "JIVA Tools", Toast.LENGTH_SHORT).show());
 
+        memory = new JivaMemory(this);
+
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 textToSpeech.setLanguage(new Locale("hi", "IN"));
@@ -157,6 +160,7 @@ public class MainActivity extends Activity {
                 if (matches != null && !matches.isEmpty()) {
                     String spokenText = matches.get(0);
                     addMessage("You", spokenText);
+                    memory.save(spokenText);
                     speak("Aapne kaha " + spokenText);
                 }
                 speechRecognizer.destroy();
