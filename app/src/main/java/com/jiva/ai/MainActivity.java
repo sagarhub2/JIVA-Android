@@ -26,6 +26,7 @@ public class MainActivity extends Activity {
     private Intent speechIntent;
     private TextToSpeech textToSpeech;
     private JivaMemory memory;
+    private JivaHistory history;
 
     private LinearLayout chatLayout;
 
@@ -98,6 +99,7 @@ public class MainActivity extends Activity {
                 Toast.makeText(this, "JIVA Tools", Toast.LENGTH_SHORT).show());
 
         memory = new JivaMemory(this);
+        history = new JivaHistory(this);
 
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
@@ -204,5 +206,8 @@ public class MainActivity extends Activity {
         text.setTextSize(17);
         text.setPadding(15, 15, 15, 15);
         chatLayout.addView(text);
+        if (history != null) {
+            history.add(sender + ": " + message);
+        }
     }
 }
