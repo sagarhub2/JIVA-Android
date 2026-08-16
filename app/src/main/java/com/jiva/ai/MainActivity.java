@@ -27,6 +27,7 @@ public class MainActivity extends Activity {
     private TextToSpeech textToSpeech;
     private JivaMemory memory;
     private JivaHistory history;
+    private JivaSearch search;
 
     private LinearLayout chatLayout;
 
@@ -95,11 +96,15 @@ public class MainActivity extends Activity {
                 Toast.makeText(this, "Chat feature next step mein connect hoga",
                         Toast.LENGTH_SHORT).show());
 
-        tools.setOnClickListener(v ->
-                Toast.makeText(this, "JIVA Tools", Toast.LENGTH_SHORT).show());
+        tools.setOnClickListener(v -> {
+            String result = JivaSearch.search("latest news");
+            addMessage("JIVA Search", result.substring(0,
+                    Math.min(result.length(), 1000)));
+        });
 
         memory = new JivaMemory(this);
         history = new JivaHistory(this);
+        search = new JivaSearch();
 
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
