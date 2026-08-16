@@ -1,6 +1,12 @@
 package com.jiva.ai;
 
 import android.app.Activity;
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.os.Bundle;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -13,6 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
+
+    private SpeechRecognizer speechRecognizer;
+    private Intent speechIntent;
 
     private LinearLayout chatLayout;
 
@@ -75,9 +84,7 @@ public class MainActivity extends Activity {
 
         root.addView(controls);
 
-        voice.setOnClickListener(v ->
-                Toast.makeText(this, "Voice feature next step mein add hoga",
-                        Toast.LENGTH_SHORT).show());
+        voice.setOnClickListener(v -> startVoiceRecognition());
 
         chat.setOnClickListener(v ->
                 Toast.makeText(this, "Chat feature next step mein connect hoga",
@@ -87,6 +94,76 @@ public class MainActivity extends Activity {
                 Toast.makeText(this, "JIVA Tools", Toast.LENGTH_SHORT).show());
 
         setContentView(root);
+    }
+
+    private void startVoiceRecognition() {
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            Toast.makeText(this, "Speech recognition available nahi hai",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                    new String[]{Manifest.permission.RECORD_AUDIO}, 100);
+            return;
+        }
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+
+        speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechIntent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechIntent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE,
+                "hi-IN");
+        speechIntent.putExtra(
+                RecognizerIntent.EXTRA_PROMPT,
+                "JIVA ko boliye...");
+
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override public void onReadyForSpeech(Bundle params) {
+                Toast.makeText(MainActivity.this, "🎙️ Sun raha hoon...",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override public void onResults(Bundle results) {
+                java.util.ArrayList<String> matches =
+                        results.getStringArrayList(
+                                SpeechRecognizer.RESULTS_RECOGNITION);
+
+                if (matches != null && !matches.isEmpty()) {
+                    addMessage("You", matches.get(0));
+                }
+                speechRecognizer.destroy();
+            }
+
+            @Override public void onError(int error) {
+                Toast.makeText(MainActivity.this,
+                        "Voice recognition error: " + error,
+                        Toast.LENGTH_SHORT).show();
+                speechRecognizer.destroy();
+            }
+
+            @Override public void onBeginningOfSpeech() {}
+            @Override public void onRmsChanged(float rmsdB) {}
+            @Override public void onBufferReceived(byte[] buffer) {}
+            @Override public void onEndOfSpeech() {}
+            @Override public void onPartialResults(Bundle partialResults) {}
+            @Override public void onEvent(int eventType, Bundle params) {}
+        });
+
+        speechRecognizer.startListening(speechIntent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+        }
+        super.onDestroy();
     }
 
     private void addMessage(String sender, String message) {
