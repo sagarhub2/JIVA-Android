@@ -119,8 +119,8 @@ public class MainActivity extends Activity {
         reminders = new JivaReminders(this);
         systemControls = new JivaSystemControls(this);
 
-        textToSpeech = new TextToSpeech(this, status -> {
-            if (status == TextToSpeech.SUCCESS) {
+        textToSpeech = new TextToSpeech(this, ttsStatus -> {
+            if (ttsStatus == TextToSpeech.SUCCESS) {
                 textToSpeech.setLanguage(new Locale("hi", "IN"));
             }
         });
