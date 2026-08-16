@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
+import java.util.Locale;
 import android.os.Bundle;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -22,6 +24,7 @@ public class MainActivity extends Activity {
 
     private SpeechRecognizer speechRecognizer;
     private Intent speechIntent;
+    private TextToSpeech textToSpeech;
 
     private LinearLayout chatLayout;
 
@@ -93,7 +96,24 @@ public class MainActivity extends Activity {
         tools.setOnClickListener(v ->
                 Toast.makeText(this, "JIVA Tools", Toast.LENGTH_SHORT).show());
 
+        textToSpeech = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                textToSpeech.setLanguage(new Locale("hi", "IN"));
+            }
+        });
+
         setContentView(root);
+    }
+
+    private void speak(String text) {
+        if (textToSpeech != null) {
+            textToSpeech.speak(
+                    text,
+                    TextToSpeech.QUEUE_FLUSH,
+                    null,
+                    "JIVA_RESPONSE"
+            );
+        }
     }
 
     private void startVoiceRecognition() {
@@ -135,7 +155,9 @@ public class MainActivity extends Activity {
                                 SpeechRecognizer.RESULTS_RECOGNITION);
 
                 if (matches != null && !matches.isEmpty()) {
-                    addMessage("You", matches.get(0));
+                    String spokenText = matches.get(0);
+                    addMessage("You", spokenText);
+                    speak("Aapne kaha " + spokenText);
                 }
                 speechRecognizer.destroy();
             }
@@ -162,6 +184,11 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         if (speechRecognizer != null) {
             speechRecognizer.destroy();
+        }
+
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
         }
         super.onDestroy();
     }
